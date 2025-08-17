@@ -1,50 +1,116 @@
 ---
-title : "Kết nối đến máy chủ Public"
+title : "Xây dựng Glue Job và kiểm tra dữ liệu"
 date :  "`r Sys.Date()`" 
 weight : 1 
 chapter : false
 pre : " <b> 3.1. </b> "
 ---
-![SSMPublicinstance](/images/arc-02.png)
 
-1. Truy cập vào [giao diện quản trị của dịch vụ EC2](https://console.aws.amazon.com/ec2/v2/home).
-  + Click chọn **Public Linux Instance**.
-  + Click **Actions**.
-  + Click **Security**.
-  + Click **Modify IAM role**.
+Trong bước này, bạn sẽ tạo một Glue Job để chuyển đổi dữ liệu từ bucket **raw** sang bucket **processed**, sau đó kiểm tra kết quả đầu ra trong S3.
 
-![Connect](/images/3.connect/001-connect.png)
+### Các bước thực hiện
 
-2. Tại trang Modify IAM role.
-  + Click chọn **SSM-Role**.
-  + Click **Save**.
+1. **Mở Glue Console**  
+   - Truy cập [AWS Glue Console](https://console.aws.amazon.com/glue/home?region=us-east-1).  
+   - Chọn **ETL Jobs** → **Add job**.
 
-{{% notice note %}}
-Bạn sẽ cần chờ khoảng 10 phút trước khi thực hiện bước tiếp theo. Thời gian này EC2 instance của chúng ta sẽ tự động đăng ký với Session Manager.
-{{% /notice %}}
+   ![Add Glue job]([Thêm ảnh chụp màn hình])
 
-3. Truy cập vào [giao diện quản trị của dịch vụ AWS Systems Manager](https://console.aws.amazon.com/systems-manager/home)
-  + Kéo thanh trượt menu bên trái xuống dưới.
-  + Click **Session Manager**.
-  + Click **Start Session**.
+2. **Dán script Glue**  
+   - Mở tab **Script**.  
+   - Xóa nội dung mặc định, dán đoạn script sau:
 
+   ```python
+   import sys
+   from awsglue.transforms import *
+   from awsglue.utils import getResolvedOptions
+   from pyspark.context import SparkContext
+   from awsglue.context import GlueContext
+   from awsglue.job import Job
+   from awsglue.dynamicframe import DynamicFrame
+   from pyspark.sql.functions import when, col, lit
+   from pyspark.sql.types import IntegerType, FloatType, TimestampType
 
-![Connect](/images/3.connect/002-connect.png)
+   args = getResolvedOptions(sys.argv, ['JOB_NAME', 'input_path'])
+   output_path = args.get('output_path', 's3://s3-processed-bucket-2025/transformed/')
 
+   sc = SparkContext()
+   glueContext = GlueContext(sc)
+   spark = glueContext.spark_session
+   job = Job(glueContext)
+   job.init(args['JOB_NAME'], args)
 
-4. Sau đó chọn **Public Linux Instance** và click **Start session** để truy cập vào instance.
+   datasource = glueContext.create_dynamic_frame.from_options(
+       format_options={"withHeader": True},
+       connection_type="s3",
+       format="csv",
+       connection_options={"paths": [args['input_path']], "recurse": True},
+   )
+   df = datasource.toDF()
 
-![Connect](/images/3.connect/003-connect.png)
+   if "participant_count" in df.columns:
+       df = df.withColumn("participant_count", col("participant_count").cast(IntegerType()))
+   if "ticket_revenue" in df.columns:
+       df = df.withColumn("ticket_revenue", col("ticket_revenue").cast(FloatType()))
+   if "event_date" in df.columns:
+       df = df.withColumn("event_date", col("event_date").cast(TimestampType()))
 
+   numeric_columns = [c for c, t in df.dtypes if t.startswith(('int','double','float')) and c in ['participant_count','ticket_revenue']]
+   status_column = next((c for c in ['ticket_revenue','participant_count'] if c in numeric_columns), None)
 
-5. Terminal sẽ xuất hiện trên trình duyệt. Kiểm tra với câu lệnh ``` sudo tcpdump -nn port 22 ``` và ```sudo tcpdump ``` chúng ta sẽ thấy không có traffic của SSH mà chỉ có traffic HTTPS.
+   def transform_df(df):
+       if status_column:
+           return (
+               df.withColumn("temp_value", when(col(status_column).isNotNull(), col(status_column).cast("float")))
+                 .withColumn("status", when(col("temp_value").isNotNull() & (col("temp_value") > 0), "completed").otherwise("cancelled"))
+                 .drop("temp_value")
+           )
+       else:
+           return df.withColumn("status", lit("unknown"))
 
-![Connect](/images/3.connect/004-connect.png)
+   transformed_df = transform_df(df)
+   transformed_dynamic_frame = DynamicFrame.fromDF(transformed_df, glueContext, "transformed_data")
 
-{{% notice note %}}
- Ở trên, chúng ta đã tạo  kết nối vào public instance mà không cần mở cổng SSH 22, giúp cho việc bảo mật tốt hơn, tránh mọi sự tấn công tới cổng SSH.\
-Một nhược điểm của cách làm trên là ta phải mở Security Group outbound ở cổng 443 ra ngoài internet. Vì là public instance nên có thể sẽ không vấn đề gì nhưng nếu bạn muốn bảo mật hơn nữa, bạn có thể khoá cổng 443 ra ngoài internet mà vẫn sử dụng được Session Manager. Chúng ta sẽ đi qua cách làm này ở phần private instance dưới đây.
- {{% /notice %}}
+   glueContext.write_dynamic_frame.from_options(
+       frame=transformed_dynamic_frame,
+       connection_type="s3",
+       connection_options={"path": output_path},
+       format="parquet"
+   )
+   job.commit()
+   ```
 
- Bạn có thể terminate để kết thúc session đang kết nối trước khi qua bước tiếp theo.
+3. **Cấu hình Job**
+   - Mở tab **Job details**.  
+   - **Name**: `TransformRawDataJob`  
+   - **IAM Role**: `AWSGlueServiceRole-RawDataCrawler`
+   - **Type**: `Spark`  
+   - **Glue version**: `4.0`
+   - **Language**: `Python 3`
+   - **Worker type**: `G 2X`
+   - **Requested number of workers**: `10`
+   - **Generate job insights**: OFF
+   - Nhấn **Save**.
 
+========================BO==============================
+
+4. **Chạy Job**
+    
+    - Quay lại danh sách **Jobs**.
+    - Chọn `TransformRawDataJob` → **Run job**.
+    - Theo dõi trạng thái cho đến khi hiển thị **Succeeded**.
+    
+    ![Run Glue Job]([Thêm ảnh chụp màn hình])
+    
+5. **Kiểm tra kết quả trên S3**
+    
+    - Mở [S3 Console](https://console.aws.amazon.com/s3/home?region=us-east-1).
+    - Vào bucket `s3-processed-bucket-2025` → thư mục `transformed/`.
+    - Xác nhận có file Parquet (`part-00000-...snappy.parquet`).
+    
+    ![Check S3 result]([Thêm ảnh chụp màn hình])
+    
+    {{% notice tip %}}  
+    File Parquet sẽ nhỏ hơn CSV vì được nén.  
+    Nếu không thấy file → kiểm tra lại `input_path` và log Glue job.  
+    {{% /notice %}}

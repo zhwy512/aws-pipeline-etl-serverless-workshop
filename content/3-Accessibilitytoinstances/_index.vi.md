@@ -1,13 +1,14 @@
 ---
-title : "Tạo kết nối đến máy chủ EC2"
+title : "Triển khai và kiểm tra pipeline"
 date :  "`r Sys.Date()`" 
 weight : 3 
 chapter : false
 pre : " <b> 3. </b> "
 ---
 
-Trong bước này, chúng ta sẽ thực hiện tạo kết nối đến các máy chủ EC2 của chúng ta, nằm trong cả public và private subnet.
+Phần này sẽ hướng dẫn bạn triển khai pipeline ETL Serverless bằng cách tạo và cấu hình AWS Glue job để chuyển đổi dữ liệu từ bucket S3 thô sang bucket đã xử lý, đồng thời kiểm tra quy trình hoạt động. Bạn sẽ sử dụng các thành phần đã thiết lập (S3 buckets, Lambda trigger) và đảm bảo dữ liệu được xử lý đúng định dạng Parquet.
 
-### Nội dung
-3.1. [Tạo Kết nối đến máy chủ EC2 Public](3.1-public-instance/) \
-3.2. [Tạo Kết nối đến máy chủ EC2 Private](3.2-private-instance/) 
+### Các bước thực hiện
+3.1. [Xây dựng Glue Job và kiểm tra dữ liệu](3.1-public-instance/) \
+3.2. [Cấu hình Lambda trigger](3.2-private-instance/) \
+3.3. [Truy vấn dữ liệu với Athena](3.3-/) 

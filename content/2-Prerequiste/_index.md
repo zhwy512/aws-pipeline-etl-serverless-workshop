@@ -1,21 +1,26 @@
 ---
-title : "Preparation "
-date : "`r Sys.Date()`"
-weight : 2
+title : "Preparation Steps"
+date :  "`r Sys.Date()`" 
+weight : 2 
 chapter : false
 pre : " <b> 2. </b> "
 ---
 
-{{% notice info %}}
-You need to create 1 Linux instance on the public subnet and 1 Window instance on the private subnet to perform this lab.
-{{% /notice %}}
+This section guides you through setting up the **initial infrastructure** for the Serverless ETL pipeline, including:
 
-To learn how to create EC2 instances and VPCs with public/private subnets, you can refer to the lab:
-  - [About Amazon EC2](https://000004.awsstudygroup.com/en/)
-  - [Works with Amazon VPC](https://000003.awsstudygroup.com/en/)
+- **Two S3 buckets**:  
+  - One bucket for storing raw data (CSV).  
+  - One bucket for storing processed data (Parquet).  
 
-In order to use System Manager to manage our window instances in particular and our instances in general on AWS, we need to give permission to our instances to be able to work with System Manager. In this preparation, we will also proceed to create an IAM Role to grant permissions to instances that can work with System Manager.
+- **IAM Roles**:  
+  - A role for AWS Glue (crawler + job).  
+  - A role for AWS Lambda (used later to trigger the Glue job).  
 
-### Content
-  - [Prepare VPC and EC2](2.1-createec2/)
-  - [Create IAM Role](2.2-createiamrole/)
+These steps prepare the basic infrastructure before creating Glue jobs and Lambda functions.
+
+---
+
+### Steps to follow
+
+1. [Create S3 buckets](2.1-create-s3-buckets/)  
+2. [Create IAM Roles for Lambda and Glue](2.2-create-iam-roles/)  

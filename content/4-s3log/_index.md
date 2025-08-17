@@ -1,23 +1,80 @@
 ---
-title : "Manage session logs"
-date : "`r Sys.Date()`"
-weight : 4
+title : "Clean Up Resources"
+date :  "`r Sys.Date()`" 
+weight : 4 
 chapter : false
 pre : " <b> 4. </b> "
 ---
 
+In this chapter, we will **clean up all resources** created during the lab to avoid incurring unexpected charges.  
 
-With Session Manager, we can view the history of connections to instances through **Session history**. However, we have not seen the details of the commands used in a session.
+---
 
-![S3](/images/4.s3/001-s3.png)
+### 4.1. Delete AWS Glue Resources
 
-In this section, we will proceed to create an S3 bucket and configure the session logs feature to see the details of the commands used in the session.
+#### Delete Glue Crawler
+1. Go to the **AWS Glue Console**.  
+2. Select **Crawlers**.  
+3. Choose the crawler created for this lab.  
+4. Click **Actions → Delete crawler**.  
+5. Confirm **Delete**.  
 
-![port-fwd](/images/arc-log.png) 
+![Delete crawler](/images/4-cleanup/delete-crawler.png)
 
-### Content:
+#### Delete Glue Database
+1. In the **AWS Glue Console**, select **Databases**.  
+2. Choose the database `event_db` (or the name you assigned).  
+3. Click **Delete** and confirm.  
 
-   - [Update IAM Role](./4.1-updateiamrole/)
-   - [Create **S3 Bucket**](./4.2-creates3bucket/)
-   - [Create S3 Gateway endpoint](./4.3-creategwes3)
-   - [Configure **Session logs**](./4.4-configsessionlogs/)
+![Delete database](/images/4-cleanup/delete-database.png)
+
+#### Delete Glue Job
+1. Open **Jobs** in Glue.  
+2. Select `TransformRawDataJob`.  
+3. Click **Delete job**.  
+
+![Delete job](/images/4-cleanup/delete-job.png)
+
+---
+
+### 4.2. Delete Lambda Function
+1. Go to the **AWS Lambda Console**.  
+2. Select the function `TriggerTransformJob`.  
+3. Click **Actions → Delete** and confirm.  
+
+![Delete lambda](/images/4-cleanup/delete-lambda.png)
+
+> 💡 You may also delete the **CloudWatch Log Group** for the Lambda function to avoid log storage costs.  
+
+---
+
+### 4.3. Delete S3 Buckets
+1. Open the **S3 Console**.  
+2. Select the bucket `s3-raw-bucket-2025` → click **Empty**.  
+   - Enter `permanently delete` to confirm.  
+3. Select the bucket again → **Delete bucket** → type the exact bucket name to confirm deletion.  
+
+Repeat the same steps for the bucket `s3-processed-bucket-2025`.  
+
+![Delete bucket](/images/4-cleanup/delete-bucket.png)
+
+---
+
+### 4.4. Delete IAM Roles
+1. Go to the **IAM Console**.  
+2. Select **Roles**.  
+3. Delete the roles created for this lab:  
+   - `LambdaTriggerRole`  
+   - `GlueServiceRole`  
+   - `GlueCrawlerRole`  
+4. Confirm deletion.  
+
+![Delete IAM role](/images/4-cleanup/delete-role.png)
+
+---
+
+### 4.5. Verify Billing
+- Open the **AWS Billing Console**.  
+- Ensure no active resources remain.  
+
+![Billing dashboard](/images/4-cleanup/billing.png)

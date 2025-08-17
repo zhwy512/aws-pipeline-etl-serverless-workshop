@@ -1,21 +1,27 @@
 ---
-title : "Session Management"
-date :  "`r Sys.Date()`" 
-weight : 1 
-chapter : false
+title: "Pipeline ETL Serverless Workshop"
+date: "`r Sys.Date()`"
+weight: 1
+chapter: false
 ---
-# Work with Amazon System Manager - Session Manager
 
-### Overall
- In this lab, you'll learn the basics and practice of Amazon  System Manager - Session Manager
-. Perform creating public and private instance connections. 
+# Pipeline ETL Serverless Workshop
 
-![ConnectPrivate](/images/arc-log.png) 
+### Overview
+
+This workshop guides you through building a **Serverless ETL (Extract, Transform, Load) pipeline** on AWS to monitor and analyze revenue from community events.
+
+The pipeline will **automate the entire data processing workflow** from multiple sources, helping to optimize costs, accelerate analysis, and reduce the risk of manual errors.
+
+![alt text](image.png)
+
+The workshop includes specific hands-on steps, from infrastructure setup to testing and resource cleanup, enabling you to apply it directly in practice, such as event data analysis, financial reporting, or interactive dashboards.
 
 ### Content
- 1. [Introduction ](1-introduce/)
- 2. [Preparation](2-prerequiste/)
- 3. [Connect to EC2 instance](3-accessibilitytoinstances/)
- 4. [Manage session logs](4-s3log/)
- 5. [Port Forwarding](5-Portfwd/)
- 6. [Clean up resources](6-cleanup/)
+
+1. [Introduction](1-introduce/)
+2. [Prepare environment and infrastructure](2-prerequiste/)
+3. [Deploy and test the pipeline](3-deployment/)
+4. [Monitoring and error handling](3-monitor-and-error-handling/)
+5. [Testing](5-testing/)
+6. [Clean up resources](6-cleanup/)

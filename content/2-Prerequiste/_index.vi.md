@@ -1,23 +1,26 @@
 ---
-title : "Các bước chuẩn bị"
+title : "Các bước chuẩn bị"
 date :  "`r Sys.Date()`" 
 weight : 2 
 chapter : false
 pre : " <b> 2. </b> "
 ---
 
-{{% notice info %}}
-Bạn cần tạo sẵn 1 Linux instance thuộc public subnet và 1 Window instance thuộc private subnet để thực hiện bài thực hành này.
-{{% /notice %}}
+Phần này hướng dẫn bạn thiết lập **cơ sở hạ tầng ban đầu** cho pipeline ETL Serverless, bao gồm:
 
-Để tìm hiểu cách tạo các EC2 instance và VPC với public/private subnet các bạn có thể tham khảo bài lab :
-  - [Giới thiệu về Amazon EC2](https://000004.awsstudygroup.com/vi/)
-  - [Làm việc với Amazon VPC](https://000003.awsstudygroup.com/vi/)
+- **Hai bucket S3**:  
+  - Một bucket để lưu trữ dữ liệu thô (CSV).  
+  - Một bucket để lưu trữ dữ liệu đã xử lý (Parquet).  
 
-Để sử dụng System Manager để quản lý window instance nói riêng và các instance nói chung của chúng ta trên AWS, ta cần phải cung cấp quyền cho các instance của chúng ta có thể làm việc với System Manager.Trong phần chuẩn bị này, chúng ta cũng sẽ tiến hành tạo IAM Role để cấp quyền cho các instance có thể làm việc với System Manager.
+- **IAM Roles**:  
+  - Role cho AWS Glue (crawler + job).  
+  - Role cho AWS Lambda (sẽ dùng ở bước sau để kích hoạt Glue job).  
 
-### Nội dung
-  - [Chuẩn bị VPC và EC2 Instance](2.1-createec2/)
-  - [Tạo IAM Role](2.2-createiamrole/)
+Các bước này giúp bạn chuẩn bị hạ tầng cơ bản trước khi tạo Glue job và Lambda function.
 
-  
+---
+
+### Các bước thực hiện
+
+1. [Tạo S3 buckets](2.1-create-s3-buckets/)  
+2. [Tạo IAM Roles cho Lambda và Glue](2.2-create-iam-roles/)  

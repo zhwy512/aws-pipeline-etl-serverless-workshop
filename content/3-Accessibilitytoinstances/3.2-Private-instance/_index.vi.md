@@ -1,20 +1,99 @@
 ---
-title : "Tạo kết nối đến máy chủ EC2 Private"
+title : "Cấu hình Lambda trigger"
 date :  "`r Sys.Date()`" 
-weight : 2 
+weight : 2
 chapter : false
-pre : " <b> 3.2. </b> "
+pre : " <b> 3.2 </b> "
 ---
-Đối với **Windows instance** nằm trong **private subnet**, không có **public IP**, không có **internet gateway** nên không thể đi ra ngoài **internet.**\
-Với loại instance này, cách làm truyền thống là ta sẽ sử dụng kỹ thuật Bastion host tốn nhiều chi phí và công sức, nhưng ở đây chúng ta sẽ sử dụng Session Manager với loại này.\
-Cơ bản là **private instance** vẫn phải mở cổng **TCP 443** tới **System Manager**, nhưng không cho kết nối đó đi ra ngoài internet mà chỉ cho đi trong chính VPC của mình, nên đảm bảo được vấn đề bảo mật.\
-Để làm được điều đó, ta phải đưa endpoint của System Manager vào trong VPC, nghĩa là sử dụng **VPC interface endpoint:** 
 
-![ConnectPrivate](/images/arc-03.png) 
+Trong bước này chúng ta sẽ tạo một Lambda function `TriggerTransformJob` để **tự động kích hoạt Glue Job** `TransformRawDataJob` mỗi khi có file CSV mới được upload vào `s3://s3-raw-bucket-2025/etl-input/`.
 
-**VPC interface endpoint** được gắn với subnet nên cách làm này không những với **private subnet** mà còn có thể làm với **public subnet**, nghĩa là với **public subnet**, bạn hoàn toàn có thể không cho **TCP 443** đi ra ngoài internet.
+---
 
-### Nội dung:
-   - [Kích hoạt DNS hostnames](./3.2.1-enablevpcdns/)
-   - [Tạo VPC Endpoint](./3.2.2-createvpcendpoint/)
-   - [Kết nối Private Instance](./3.3.3-connectec2/)
+### 1. Tải file Lambda mẫu:
+
+👉 [Nhấn vào đây để tải file .zip](/files/lambda-trigger-transform.zip)
+
+File này chứa sẵn mã nguồn với logic:
+- Nhận event từ S3 (bucket + object key).  
+- Gọi `glue.startJobRun` với tham số `--input_path` là đường dẫn file CSV vừa upload.  
+- In ra JobRunId của Glue job để theo dõi.  
+
+---
+
+### 2. Tạo Lambda Function
+
+1. Mở [AWS Lambda Console](https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1).  
+2. Chọn **Create function** → **Author from scratch**:
+   - **Function name**: `TriggerTransformJob`  
+   - **Runtime**: `Node.js 22.x`
+   
+   ![alt text](image.png)
+   
+   - **Execution role**: mở rộng phần **Change default execution role** → chọn **Use an existing role** → `LambdaTriggerRole` (tạo ở bước 2.2).  
+   
+   ![alt text](image-1.png)
+   
+   - Bấm **Create function**.  
+
+3. Trong tab **Code**, chọn **Upload from → .zip file** → chọn file `.zip` vừa tải về → click **Deploy**. 
+
+---
+
+### 3. Thêm Trigger S3
+
+1. Vào tab **Configuration → Triggers → Add trigger**.  
+2. Chọn **S3**:  
+   - **Bucket**: `s3-raw-bucket-2025`  
+   - **Event type**: `All object create events`  
+   - **Prefix**: `etl-input/`  
+   - **Suffix**: `.csv` (để chỉ bắt file CSV, tuỳ chọn)  
+   - Tích vào ô xác nhận chi phí → **Add**. 
+   
+   ![alt text](image-2.png)
+
+---
+
+### 4. Kiểm tra Lambda bằng Test Event
+
+Bạn có thể test trực tiếp trong Lambda console bằng cách tạo một **Test event** với nội dung sau:
+
+```json
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "s3-raw-bucket-2025"
+        },
+        "object": {
+          "key": "etl-input/event_data.csv"
+        }
+      }
+    }
+  ]
+}
+```
+
+Khi chạy test, Lambda sẽ in ra JobRunId mới của Glue job `TransformRawDataJob`.
+
+---
+
+### 5. Xác minh toàn bộ pipeline
+
+1. Upload file CSV thật (vd: `etl-input/sales.csv`) lên `s3://s3-raw-bucket-2025/etl-input/`.
+    
+2. Lambda tự động được kích hoạt và gọi Glue job.
+    
+3. Vào **Glue → Jobs → TransformRawDataJob** để xem run mới.
+    
+4. Sau khi Glue job chạy xong, kiểm tra kết quả trong `s3://s3-processed-bucket-2025/transformed/`.
+    
+
+---
+
+### 6. Lưu ý
+
+- Nếu Lambda không được trigger, kiểm tra lại **S3 Event Notifications** và IAM permission của Lambda.  
+- Nếu Lambda bị lỗi khi gọi Glue, kiểm tra policy `glue:StartJobRun` trong role `LambdaTriggerRole`.
+- Lambda **chỉ nên gọi start job** và thoát; việc xử lý chính được Glue đảm nhiệm.

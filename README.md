@@ -71,5 +71,3 @@ The solution focuses on:
 * **CloudWatch Logs**: For Lambda and Glue job logs.
 * **CloudWatch Metrics**: For monitoring job success/failure.
 * **Alerts**: Can be configured using CloudWatch Alarms and SNS.
-Bạn có muốn mình viết thêm **Hướng dẫn chi tiết (step-by-step)** trong README luôn không, hay chỉ để bản khung này còn docs chi tiết thì để trong thư mục `docs/`?
-```

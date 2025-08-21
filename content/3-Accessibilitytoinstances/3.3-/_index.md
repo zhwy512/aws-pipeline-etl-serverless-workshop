@@ -11,9 +11,10 @@ After the data has been transformed and stored as **Parquet** in S3, you can use
 ### 1. Create Database
    - Click **Create database**.  
    - Enter the name: `event_db`.  
-   - Click **Create**.  
+   
+   ![alt text](image.png)
 
-   ![Create database]([Add screenshot])
+   - Click **Create**.
 
 ### 2. Create Glue Crawler
 
@@ -54,9 +55,10 @@ FROM event_db.event_table
 LIMIT 20;
 ````
 
-![Athena Query](https://chatgpt.com/c/image-1.png)
+![alt text](image-1.png)
 
 - The result displays the transformed data from the Glue job.
+- In this result, there will be an additional status field to check data of completed or canceled events.
     
 
 ---

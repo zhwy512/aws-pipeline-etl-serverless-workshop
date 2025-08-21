@@ -21,7 +21,5 @@ The workshop includes specific hands-on steps, from infrastructure setup to test
 
 1. [Introduction](1-introduce/)
 2. [Prepare environment and infrastructure](2-prerequiste/)
-3. [Deploy and test the pipeline](3-deployment/)
-4. [Monitoring and error handling](3-monitor-and-error-handling/)
-5. [Testing](5-testing/)
-6. [Clean up resources](6-cleanup/)
+3. [Deploy and test the pipeline](3-Accessibilitytoinstances/)
+4. [Clean up resources](4-cleanup/)

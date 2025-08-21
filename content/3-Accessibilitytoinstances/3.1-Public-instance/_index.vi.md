@@ -12,9 +12,12 @@ Trong bước này, bạn sẽ tạo một Glue Job để chuyển đổi dữ l
 
 1. **Mở Glue Console**  
    - Truy cập [AWS Glue Console](https://console.aws.amazon.com/glue/home?region=us-east-1).  
-   - Chọn **ETL Jobs** → **Add job**.
+   - Chọn **ETL Jobs** → **Script editor**.
+  
+   ![alt text](image.png)
 
-   ![Add Glue job]([Thêm ảnh chụp màn hình])
+  - **Engine**: `Spark`
+  - Nhấn **Create script**
 
 2. **Dán script Glue**  
    - Mở tab **Script**.  
@@ -93,4 +96,10 @@ Trong bước này, bạn sẽ tạo một Glue Job để chuyển đổi dữ l
    - **Continuous logging**: ON
    - **Spark UI**: OFF
    - **Maximum concurrency**: `2`
+   - Trong phần **Job parameters**:
+    | Key | Value |
+    |-----|-------|
+    | --cloudwatch-log-group | /aws-glue/jobs/logs-v2 |
+    | --job-bookmark-enable | true |
+   
    - Nhấn **Save**.

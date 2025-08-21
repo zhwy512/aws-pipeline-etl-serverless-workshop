@@ -12,9 +12,12 @@ In this step, you will create a Glue Job to transform data from the **raw** buck
 
 1. **Open Glue Console**  
   - Go to [AWS Glue Console](https://console.aws.amazon.com/glue/home?region=us-east-1).  
-  - Select **ETL Jobs** → **Add job**.  
+  - Select **ETL Jobs** → **Script editor**.  
 
-  ![Add Glue job]([Insert screenshot])
+  ![alt text](image.png)
+  
+  - **Engine**: `Spark`
+  - Click **Create script**
 
 2. **Paste Glue Script**  
   - Open the **Script** tab.  
@@ -91,4 +94,13 @@ In this step, you will create a Glue Job to transform data from the **raw** buck
   * **Worker type**: `G 2X`
   * **Requested number of workers**: `10`
   * **Generate job insights**: OFF
+  * **Generate job insights**: OFF
+  * **Continuous logging**: ON
+  * **Spark UI**: OFF
+  * **Maximum concurrency**: `2`
+  * Trong phần **Job parameters**:
+    | Key | Value |
+    |-----|-------|
+    | --cloudwatch-log-group | /aws-glue/jobs/logs-v2 |
+    | --job-bookmark-enable | true |
   * Click **Save**.

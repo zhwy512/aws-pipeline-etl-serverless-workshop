@@ -9,11 +9,12 @@ pre : " <b> 3.3. </b> "
 Sau khi dữ liệu đã được chuyển đổi và lưu dưới dạng **Parquet** trong S3, bạn có thể dùng **Amazon Athena** để truy vấn.
 
 ### 1. Tạo Database
-   - Chọn **Create database**.  
-   - Nhập tên: `event_db`.  
+   - Chọn **Create database**.
+   - Nhập tên: `event_db`.
+   
+   ![alt text](image.png)
+   
    - Nhấn **Create**.  
-
-   ![Create database]([Thêm ảnh chụp màn hình])
 
 ### 2. Tạo Glue Crawler
 
@@ -36,7 +37,6 @@ Sau khi dữ liệu đã được chuyển đổi và lưu dưới dạng **Parq
 2. Sau khi hoàn tất, vào tab **Tables** của Glue Console.  
 - Bạn sẽ thấy bảng mới (ví dụ: `event_table`) được tạo ra dựa trên schema từ file Parquet.  
 
-![Glue Crawler tạo bảng](image.png)
 
 ---
 
@@ -51,12 +51,14 @@ Sau khi dữ liệu đã được chuyển đổi và lưu dưới dạng **Parq
 ```sql
 SELECT * 
 FROM event_db.event_table 
-LIMIT 20;
+LIMIT 100;
 ```
 
-![Athena Query](https://chatgpt.com/c/image-1.png)
+![alt text](image-1.png)
 
 - Kết quả hiển thị dữ liệu đã transform từ Glue job.
+- Trong kết quả sẽ có thêm trường status để check dữ liệu các sự kiện đã hoàn thành hay hủy.
+
     
 ---
 

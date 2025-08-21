@@ -92,26 +92,3 @@ In this step, you will create a Glue Job to transform data from the **raw** buck
   * **Requested number of workers**: `10`
   * **Generate job insights**: OFF
   * Click **Save**.
-
----
-
-4. **Run the Job**
-
-  * Go back to the **Jobs** list.
-  * Select `TransformRawDataJob` → **Run job**.
-  * Monitor until the status shows **Succeeded**.
-
-  !\[Run Glue Job]\(\[Insert screenshot])
-
-5. **Check Results in S3**
-
-  * Open [S3 Console](https://console.aws.amazon.com/s3/home?region=us-east-1).
-  * Navigate to bucket `s3-processed-bucket-2025` → folder `transformed/`.
-  * Verify that a Parquet file exists (`part-00000-...snappy.parquet`).
-
-  !\[Check S3 result]\(\[Insert screenshot])
-
-  {{% notice tip %}}
-  The Parquet file will be smaller than the CSV due to compression.
-  If no file is found → double-check the `input_path` and Glue job logs.
-  {{% /notice %}}

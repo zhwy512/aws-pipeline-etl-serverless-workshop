@@ -90,27 +90,7 @@ Trong bước này, bạn sẽ tạo một Glue Job để chuyển đổi dữ l
    - **Worker type**: `G 2X`
    - **Requested number of workers**: `10`
    - **Generate job insights**: OFF
+   - **Continuous logging**: ON
+   - **Spark UI**: OFF
+   - **Maximum concurrency**: `2`
    - Nhấn **Save**.
-
-========================BO==============================
-
-4. **Chạy Job**
-    
-    - Quay lại danh sách **Jobs**.
-    - Chọn `TransformRawDataJob` → **Run job**.
-    - Theo dõi trạng thái cho đến khi hiển thị **Succeeded**.
-    
-    ![Run Glue Job]([Thêm ảnh chụp màn hình])
-    
-5. **Kiểm tra kết quả trên S3**
-    
-    - Mở [S3 Console](https://console.aws.amazon.com/s3/home?region=us-east-1).
-    - Vào bucket `s3-processed-bucket-2025` → thư mục `transformed/`.
-    - Xác nhận có file Parquet (`part-00000-...snappy.parquet`).
-    
-    ![Check S3 result]([Thêm ảnh chụp màn hình])
-    
-    {{% notice tip %}}  
-    File Parquet sẽ nhỏ hơn CSV vì được nén.  
-    Nếu không thấy file → kiểm tra lại `input_path` và log Glue job.  
-    {{% /notice %}}
